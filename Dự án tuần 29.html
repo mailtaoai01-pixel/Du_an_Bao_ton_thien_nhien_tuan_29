@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Dự án bảo tồn cảnh quan</title>
+
+<style>
+body {font-family: Arial; margin:0; background:#f4f6f7;}
+
+.header{
+text-align:center;
+padding:30px;
+color:white;
+background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470') center/cover;
+}
+
+/* NHÓM */
+.group{
+margin:20px;
+padding:15px;
+border-radius:15px;
+background-size:cover;
+background-position:center;
+background-blend-mode:overlay;
+}
+
+.group1{background-color:rgba(46,204,113,0.85); background-image:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6');}
+.group2{background-color:rgba(52,152,219,0.85); background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');}
+.group3{background-color:rgba(241,196,15,0.85); background-image:url('https://images.unsplash.com/photo-1491553895911-0055eca6402d');}
+.group4{background-color:rgba(233,30,99,0.85); background-image:url('https://images.unsplash.com/photo-1490750967868-88aa4486c946');}
+
+h2{text-align:center;color:white;font-size:24px;}
+.project{text-align:center;font-size:18px;font-weight:bold;color:white;margin-bottom:10px;}
+
+/* BOX */
+.flex{display:flex; gap:12px; flex-wrap:wrap;}
+.box{flex:1;background:white;padding:10px;border-radius:10px;}
+
+/* TABLE */
+table{width:100%; border-collapse:collapse;}
+th{background:#ecf0f1;}
+td,th{border:1px solid #ccc; padding:6px;}
+
+/* TEXTAREA */
+textarea{
+width:95%;
+min-height:40px;
+resize:none;
+overflow:hidden;
+}
+
+/* MINH CHỨNG */
+.box table td:nth-child(4),
+.box table th:nth-child(4){
+width:8%;
+}
+
+/* FILE */
+.file-item{
+margin:5px;
+padding:5px;
+background:#f9f9f9;
+border-radius:3px;
+}
+
+.file-item img{
+  width:80px;
+  height:120px;
+  object-fit:cover;
+  cursor:pointer;
+}
+.file-item video{
+  width:80px;
+}
+.file-item video{max-width:120px;}
+.file-item button{
+background:red;color:white;border:none;cursor:pointer;
+}
+
+/* NÚT */
+.print-btn,.download-btn,.clear-btn{
+margin:5px;
+padding:6px 10px;
+color:white;
+border:none;
+cursor:pointer;
+border-radius:5px;
+}
+.print-btn{background:#2c3e50;}
+.download-btn{background:#27ae60;}
+.clear-btn{background:#e74c3c;}
+#viewer{
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.8);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+#viewer img,
+#viewer video{
+  max-width:90%;
+  max-height:90%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>DỰ ÁN BẢO TỒN CẢNH QUAN THIÊN NHIÊN</h1>
+</div>
+
+<script>
+// AUTO SIZE
+function autoResize(el){
+el.style.height="auto";
+el.style.height=el.scrollHeight+"px";
+}
+
+// SAVE
+function save(){
+  let data = {
+    text: [],
+    files: {}
+  };
+
+  document.querySelectorAll("textarea").forEach(t=>{
+    data.text.push(t.value);
+  });
+
+  document.querySelectorAll(".file-box").forEach(box=>{
+    let id = box.id;
+    let arr = [];
+    box.querySelectorAll("img,video,a").forEach(el=>{
+      arr.push({
+        type: el.tagName,
+        src: el.src || el.href
+      });
+    });
+    data.files[id] = arr;
+  });
+
+  localStorage.setItem("data", JSON.stringify(data));
+}
+
+function load(){
+  let data = JSON.parse(localStorage.getItem("data") || "{}");
+
+  // load text
+  let i = 0;
+  document.querySelectorAll("textarea").forEach(t=>{
+    if(data.text && data.text[i]){
+      t.value = data.text[i];
+    }
+    i++;
+  });
+
+  // load file
+  if(data.files){
+    for(let id in data.files){
+      let box = document.getElementById(id);
+      if(!box) continue;
+
+      box.innerHTML = "";
+
+      data.files[id].forEach(f=>{
+        let div = document.createElement("div");
+        div.className = "file-item";
+
+        let el;
+        if(f.type=="IMG"){
+  el = document.createElement("img");
+  el.src = f.src;
+
+  // giữ kích thước nhỏ
+  el.style.width="80px";
+  el.style.height="80px";
+  el.style.objectFit="cover";
+  el.style.cursor="pointer";
+
+  el.onclick=()=>viewImage(f.src);
+
+}else if(f.type=="VIDEO"){
+  el = document.createElement("video");
+  el.src = f.src;
+  el.controls = true;
+
+  el.style.width="80px";
+  el.style.height="120px";
+  el.style.objectFit="cover";
+  el.style.cursor="pointer";
+
+  el.onclick=()=>viewVideo(f.src);
+}
+
+        div.appendChild(el);
+
+        let del = document.createElement("button");
+        del.innerText="X";
+        del.onclick=()=>{div.remove(); save();};
+
+        div.appendChild(del);
+        box.appendChild(div);
+      });
+    }
+  }
+}
+function viewImage(src){
+  let v=document.getElementById("viewer");
+  let img=document.getElementById("viewImg");
+  let video=document.getElementById("viewVideo");
+
+  video.style.display="none";
+  img.style.display="block";
+
+  img.src=src;
+  v.style.display="flex";
+}
+
+function viewVideo(src){
+  let v=document.getElementById("viewer");
+  let img=document.getElementById("viewImg");
+  let video=document.getElementById("viewVideo");
+
+  img.style.display="none";
+  video.style.display="block";
+
+  video.src=src;
+   video.currentTime = 0; // chạy từ đầu
+  video.play();          // 🔥 bấm là phát ngay
+  v.style.display="flex";
+}
+
+// bấm ra ngoài để tắt
+document.addEventListener("click", function(e){
+  let v=document.getElementById("viewer");
+  if(e.target.id==="viewer"){
+    v.style.display="none";
+    document.getElementById("viewVideo").pause();
+  }
+});
+window.onload = () => {
+  setTimeout(load, 200); // đợi render xong rồi load
+};
+
+// XÓA DATA LỖI
+function clearData(){
+localStorage.removeItem("data");
+location.reload();
+}
+
+// INPUT
+function input(el){
+autoResize(el);
+save();
+}
+
+// DOWNLOAD
+function downloadPage(){
+let blob=new Blob([document.documentElement.outerHTML],{type:"text/html"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="du_an.html";
+a.click();
+}
+
+// FILE
+function upload(e,id){
+  let c=document.getElementById(id);
+  c.classList.add("file-box");
+
+  Array.from(e.target.files).forEach(f=>{
+    let reader=new FileReader();
+    reader.onload=()=>{
+      let url=reader.result;
+
+      let div=document.createElement("div");
+      div.className="file-item";
+
+      let el;
+
+      if(f.type.startsWith("image")){
+        el=document.createElement("img");
+        el.src=url;
+        el.style.width="80px";
+        el.style.cursor="pointer";
+        el.onclick=()=>viewImage(url);
+      }
+      else if(f.type.startsWith("video")){
+  el=document.createElement("video");
+  el.src=url;
+  el.controls=true;
+
+  // kích thước giống ảnh
+  el.style.width="80px";
+  el.style.height="80px";
+  el.style.objectFit="cover";
+  el.style.cursor="pointer";
+
+  // mở to khi bấm
+  el.onclick=()=>viewVideo(url);
+}
+      
+      let del=document.createElement("button");
+      del.innerText="X";
+      del.onclick=()=>{div.remove(); save();};
+
+      div.appendChild(el);
+      div.appendChild(del);
+      c.appendChild(div);
+
+      save();
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+// BẢNG
+function progress(id){
+let h="";
+for(let i=0;i<5;i++){
+h+=`<tr>
+<td><textarea oninput="input(this)"></textarea></td>
+<td><textarea oninput="input(this)"></textarea></td>
+<td><textarea oninput="input(this)"></textarea></td>
+<td><textarea oninput="input(this)"></textarea></td>
+</tr>`;
+}
+document.getElementById(id).innerHTML=h;
+}
+
+function summary(id){
+let arr=[
+"Tên cảnh quan","Địa chỉ","Đặc điểm nổi bật","Thực trạng hiện nay",
+"Nguyên nhân","Hậu quả"
+];
+
+let h="";
+arr.forEach((t,i)=>{
+h+=`<tr>
+<td>${i+1}</td>
+<td>${t}</td>
+<td><textarea oninput="input(this)"></textarea></td>
+<td>
+<input type="file" id="file${id+i}" onchange="upload(event,'${id+i}')" style="display:none">
+<button onclick="document.getElementById('file${id+i}').click()">📁</button>
+<div id="${id+i}" class="file-box"></div>
+</td>
+<td><textarea oninput="input(this)"></textarea></td>
+</tr>`;
+});
+document.getElementById(id).innerHTML=h;
+}
+
+// NHÓM
+function group(name,project,cls,id){
+document.write(`
+<div class="group ${cls}">
+<h2>${name}</h2>
+<div class="project">${project}</div>
+
+<button class="print-btn" onclick="printGroup('g${id}')">🖨️ In</button>
+<div id="g${id}">
+<div class="flex">
+
+<div class="box">
+<h3>📅 Bảng theo dõi tiến độ dự án</h3>
+<table>
+<tr>
+<th rowspan="2">Công việc</th>
+<th rowspan="2">Người phụ trách</th>
+<th colspan="2">Tiến độ thực hiện</th>
+</tr>
+<tr>
+<th>Tuần 1</th>
+<th>Tuần 2</th>
+</tr>
+<tbody id="p${id}"></tbody>
+</table>
+</div>
+
+<div class="box">
+<h3>📊 Phiếu tổng hợp kết quả tìm hiểu thực trạng</h3>
+<table>
+<tr>
+<th>STT</th>
+<th>Nội dung</th>
+<th>Kết quả</th>
+<th>Minh chứng</th>
+<th>Ghi chú</th>
+</tr>
+<tbody id="s${id}"></tbody>
+</table>
+</div>
+
+</div>
+</div>
+</div>
+`);
+setTimeout(()=>{
+progress("p"+id);
+summary("s"+id);
+},0);
+}
+
+// IN
+function printGroup(id){
+  let div = document.getElementById(id).parentNode.cloneNode(true);
+
+  // 🔥 chuyển textarea thành text
+  div.querySelectorAll("textarea").forEach(t=>{
+    let p = document.createElement("div");
+    p.innerText = t.value;
+    p.style.border="1px solid #ccc";
+    p.style.padding="5px";
+    t.parentNode.replaceChild(p, t);
+  });
+
+  let win = window.open("");
+  win.document.write(`
+    <html>
+    <head>
+      <title>In</title>
+      <style>
+        body{font-family:Arial}
+        table{width:100%; border-collapse:collapse}
+        td,th{border:1px solid #000; padding:5px}
+      </style>
+    </head>
+    <body>
+      ${div.innerHTML}
+    </body>
+    </html>
+  `);
+
+  win.print();
+}
+</script>
+
+<script>
+group("🌊 Nhóm Dòng Nước","Biển Cồn Nhàn – Giữ xanh dòng nước quê hương","group2",2);
+group("🌿 Nhóm Mầm Xanh","Kênh rạch quê em – Khơi dòng xanh sạch","group1",1);
+group("🌞 Nhóm Ánh Dương","Vịnh Hạ Long – Kỳ quan thiên nhiên trước áp lực môi trường","group3",3);
+group("🌸 Nhóm Hoa Xinh","Đà Lạt – Thành phố hoa và bài toán bảo tồn cảnh quan","group4",4);
+</script>
+<div id="viewer" onclick="this.style.display='none'">
+  <img id="viewImg">
+  <video id="viewVideo" controls></video>
+</div>
+
+</body>
+<!-- </html> -->
