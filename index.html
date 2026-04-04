@@ -26,11 +26,23 @@ background-blend-mode:overlay;
 
 .group1{background-color:rgba(46,204,113,0.85); background-image:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6');}
 .group2{background-color:rgba(52,152,219,0.85); background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');}
-.group3{background-color:rgba(241,196,15,0.85); background-image:url('https://images.unsplash.com/photo-1491553895911-0055eca6402d');}
+.group3{background-color:rgba(211,84,0,0.85); background-image:url('https://images.unsplash.com/photo-1491553895911-0055eca6402d');}
 .group4{background-color:rgba(233,30,99,0.85); background-image:url('https://images.unsplash.com/photo-1490750967868-88aa4486c946');}
 
-h2{text-align:center;color:white;font-size:24px;}
-.project{text-align:center;font-size:18px;font-weight:bold;color:white;margin-bottom:10px;}
+h2{
+text-align:center;
+color:white;
+font-size:24px;
+text-shadow:1px 1px 3px black;
+}
+.project{
+text-align:center;
+font-size:22px;
+font-weight:bold;
+color:white;
+margin-bottom:10px;
+text-shadow:1px 1px 3px black;
+}
 
 /* BOX */
 .flex{display:flex; gap:12px; flex-wrap:wrap;}
@@ -442,10 +454,10 @@ function printGroup(id){
 </script>
 
 <script>
-group("🌊 Nhóm Dòng Nước","Biển Cồn Nhàn – Giữ xanh dòng nước quê hương","group2",2);
-group("🌿 Nhóm Mầm Xanh","Kênh rạch quê em – Khơi dòng xanh sạch","group1",1);
-group("🌞 Nhóm Ánh Dương","Vịnh Hạ Long – Kỳ quan thiên nhiên trước áp lực môi trường","group3",3);
-group("🌸 Nhóm Hoa Xinh","Đà Lạt – Thành phố hoa và bài toán bảo tồn cảnh quan","group4",4);
+group("🌊 Nhóm Sóng Xanh","Dự án Giữ mãi nét đẹp Cồn Nhàn","group2",2);
+group("🌿 Nhóm Mầm Non","Dự án Khơi dòng kênh xanh","group1",1);
+group("🌞 Nhóm Ánh Dương","Dự án Bảo tồn vịnh biển Hạ Long","group3",3);
+group("🌸 Nhóm Hoa Xinh","Dự án Giữ màu hoa Đà Lạt","group4",4);
 </script>
 <div id="viewer" onclick="this.style.display='none'">
   <img id="viewImg">
