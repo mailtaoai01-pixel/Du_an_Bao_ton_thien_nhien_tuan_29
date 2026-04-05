@@ -185,77 +185,7 @@ function load(){
     let data = snapshot.val();
 
     if(!data) return;
-
-    // load text
-    let i = 0;
-    document.querySelectorAll("textarea").forEach(t=>{
-      if(data.text && data.text[i]){
-        t.value = data.text[i];
-        autoResize(t);
-      }
-      i++;
-    });
-
-    // load file
-    if(data.files){
-      for(let id in data.files){
-
-        let box = document.getElementById(id);
-        if(!box) continue;
-
-        box.innerHTML = "";
-
-        data.files[id].forEach(f=>{
-
-          let div = document.createElement("div");
-          div.className = "file-item";
-
-          let el;
-
-          if(f.type=="IMG"){
-            el = document.createElement("img");
-            el.src = f.src;
-            el.style.width="80px";
-            el.style.height="80px";
-            el.style.objectFit="cover";
-            el.style.cursor="pointer";
-            el.onclick=()=>viewImage(f.src);
-          }
-
-          else if(f.type=="VIDEO"){
-            el = document.createElement("video");
-            el.src = f.src;
-            el.controls = true;
-            el.style.width="80px";
-            el.style.height="80px";
-            el.style.objectFit="cover";
-            el.style.cursor="pointer";
-            el.onclick=()=>viewVideo(f.src);
-          }
-
-          div.appendChild(el);
-
-          let del = document.createElement("button");
-          del.innerText="X";
-          del.onclick=()=>{
-            div.remove();
-            save();
-          };
-
-          div.appendChild(del);
-
-          box.appendChild(div);
-
-        });
-      }
-    }
-
-  });
-
-}
-
-
-  // load text
+	 // load text
   let i = 0;
   document.querySelectorAll("textarea").forEach(t=>{
     if(data.text && data.text[i]){
@@ -264,9 +194,7 @@ function load(){
     }
     i++;
 });
-
-
-  // load file
+// load file
   if(data.files){
     for(let id in data.files){
       let box = document.getElementById(id);
@@ -303,7 +231,6 @@ function load(){
 
   el.onclick=()=>viewVideo(f.src);
 }
-
         div.appendChild(el);
 
         let del = document.createElement("button");
@@ -315,6 +242,7 @@ function load(){
       });
     }
   }
+  });  
 }
 function viewImage(src){
   let v=document.getElementById("viewer");
