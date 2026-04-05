@@ -118,6 +118,9 @@ border-radius:5px;
   max-height:90%;
 }
 </style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 
 <body>
@@ -127,6 +130,22 @@ border-radius:5px;
 </div>
 
 <script>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDHVDhDTOSVphcOglLaQMUfIdGauW1rGPk",
+  authDomain: "du-an-tuan-29.firebaseapp.com",
+  projectId: "du-an-tuan-29",
+  storageBucket: "du-an-tuan-29.firebasestorage.app",
+  messagingSenderId: "680922250092",
+  appId: "1:680922250092:web:bfe5d73b4413a489f15149"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Tạo kết nối database
+const db = firebase.database();
+
 // AUTO SIZE
 function autoResize(el){
 el.style.height="auto";
@@ -156,20 +175,96 @@ function save(){
     data.files[id] = arr;
   });
 
-  localStorage.setItem("data", JSON.stringify(data));
+  db.ref("duLieu").set(data);
 }
 
 function load(){
-  let data = JSON.parse(localStorage.getItem("data") || "{}");
+
+  db.ref("duLieu").on("value",(snapshot)=>{
+
+    let data = snapshot.val();
+
+    if(!data) return;
+
+    // load text
+    let i = 0;
+    document.querySelectorAll("textarea").forEach(t=>{
+      if(data.text && data.text[i]){
+        t.value = data.text[i];
+        autoResize(t);
+      }
+      i++;
+    });
+
+    // load file
+    if(data.files){
+      for(let id in data.files){
+
+        let box = document.getElementById(id);
+        if(!box) continue;
+
+        box.innerHTML = "";
+
+        data.files[id].forEach(f=>{
+
+          let div = document.createElement("div");
+          div.className = "file-item";
+
+          let el;
+
+          if(f.type=="IMG"){
+            el = document.createElement("img");
+            el.src = f.src;
+            el.style.width="80px";
+            el.style.height="80px";
+            el.style.objectFit="cover";
+            el.style.cursor="pointer";
+            el.onclick=()=>viewImage(f.src);
+          }
+
+          else if(f.type=="VIDEO"){
+            el = document.createElement("video");
+            el.src = f.src;
+            el.controls = true;
+            el.style.width="80px";
+            el.style.height="80px";
+            el.style.objectFit="cover";
+            el.style.cursor="pointer";
+            el.onclick=()=>viewVideo(f.src);
+          }
+
+          div.appendChild(el);
+
+          let del = document.createElement("button");
+          del.innerText="X";
+          del.onclick=()=>{
+            div.remove();
+            save();
+          };
+
+          div.appendChild(del);
+
+          box.appendChild(div);
+
+        });
+      }
+    }
+
+  });
+
+}
+
 
   // load text
   let i = 0;
   document.querySelectorAll("textarea").forEach(t=>{
     if(data.text && data.text[i]){
       t.value = data.text[i];
+      autoResize(t);   // ⭐ thêm dòng này
     }
     i++;
-  });
+});
+
 
   // load file
   if(data.files){
@@ -256,12 +351,19 @@ document.addEventListener("click", function(e){
   }
 });
 window.onload = () => {
-  setTimeout(load, 200); // đợi render xong rồi load
+  setTimeout(()=>{
+    load();
+
+    document.querySelectorAll("textarea").forEach(t=>{
+      autoResize(t);
+    });
+
+  },200);
 };
 
 // XÓA DATA LỖI
 function clearData(){
-localStorage.removeItem("data");
+db.ref("duLieu").remove();
 location.reload();
 }
 
